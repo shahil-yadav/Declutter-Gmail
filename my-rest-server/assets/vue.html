@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>app</title>
+  </head>
+
+  <body>
+    <!-- 540kb -->
+    <script type="importmap">
+      {
+        "imports": {
+          "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+        }
+      }
+    </script>
+    <!-- axios instance will be availaible now -->
+    <!-- 55.3kb -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+    <!-- vue controlled -->
+    <div id="app">
+      <nav>
+        <a v-if="!account.isAuthenticated" href="/login?redirect=true">login</a>
+        <a v-else href="/logout">logout</a>
+      </nav>
+
+      <div v-if="account.isAuthenticated">
+        <!-- Account Info -->
+        <div>
+          <p v-if="account.error">Failed to login, {{ account.error }}</p>
+          <p v-else>Welcome, {{ account.email }}</p>
+        </div>
+
+        <div v-if="!filteredList.length">
+          <a href="/auth/load">Load Data</a>
+        </div>
+        <table v-else>
+          <tr>
+            <th>sender mails</th>
+            <th>count</th>
+            <th>more</th>
+          </tr>
+
+          <tr v-for="entry in filteredList" :key="entry.id">
+            <td>{{ entry.sender }}</td>
+            <td>{{ entry.count }}</td>
+            <td>
+              <button @click="handleDelete(entry.id, entry.sender)">X</button>
+            </td>
+          </tr>
+        </table>
+      </div>
+      <div v-else>Please login in order to continue</div>
+    </div>
+
+    <script type="module">
+      import { createApp, ref, reactive, onMounted, computed } from "vue";
+
+      createApp({
+        setup() {
+          let id = 0;
+
+          const account = reactive({
+            isAuthenticated: false,
+            email: "",
+            error: "",
+          });
+
+          const list = reactive([
+            // { id: string, count: number, sender: string },
+          ]);
+
+          const deleted = reactive([
+            // id: string
+          ]);
+
+          const filteredList = computed(() =>
+            list.filter((val) => !deleted.includes(val.id))
+          );
+
+          // id: number
+          async function handleDelete(id, sender) {
+            const res = await axios.delete(`/auth/list/${sender}`);
+            if (res.data.success) {
+              // remove from frontend
+              deleted.push(id);
+              alert(`Deleted ${res.data.ids.length} mails`);
+            }
+          }
+
+          onMounted(() => {
+            async function populateData() {
+              const res = await axios.get("/auth/list");
+
+              // user is not authenticated
+              if (res.status === 401) return;
+
+              for (const item of res.data) {
+                list.push({
+                  id: id++,
+                  count: item.count,
+                  sender: item.sender,
+                });
+              }
+            }
+
+            async function verifyLoginStatus() {
+              const res = await axios.get("/auth?json=true");
+              if (res.status === 401) return;
+
+              const { status, data } = res;
+              account.email = data.account_address;
+              account.isAuthenticated = data.success;
+              account.error = data.error;
+
+              await populateData();
+            }
+
+            verifyLoginStatus();
+          });
+
+          return {
+            account,
+            list,
+            deleted,
+            filteredList,
+            handleDelete,
+          };
+        },
+      }).mount("#app");
+    </script>
+  </body>
+</html>

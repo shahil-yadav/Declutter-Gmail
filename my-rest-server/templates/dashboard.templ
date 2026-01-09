@@ -1,0 +1,66 @@
+package templates
+
+import "my-gmail-server/models"
+
+templ DashboardPage(myName string, status string, userId int, senders []models.MailFolder) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<title>{ myName }</title>
+			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.4.0/dist/css/tabler.min.css"/>
+		</head>
+		<body>
+			<div class="page-body">
+				<div class="container-xl">
+					switch status {
+						case models.Pending:
+							<div>
+								<h2>Loading</h2>
+								<p>Please come back after 30 minutes, im downloading and parsing all your mails from the mailbox</p>
+							</div>
+						case models.Failed:
+							<div>
+								<h2>Failed</h2>
+								<p>Im at fault, i have not yet implemented retry mechanisms, contact shahil</p>
+							</div>
+						default:
+							<form action="/v1/job/trash" method="post">
+								<div class="card">
+									<div class="card-header justify-content-between">
+										<h3 class="card-title">Senders</h3>
+										<input type="hidden" name="user-id" value={userId} />
+										<button type="submit" class="btn btn-danger">Trash</button>
+									</div>
+									<div class="list-group list-group-flush">
+										for _, sender := range senders {
+											// todo: add the support of active class in .list-group-item by js
+											<div id={ "s-" + sender.SenderEmail } class="list-group-item">
+												<div class="row align-items-center">
+													<div class="col-auto">
+														<input value={ sender.SenderEmail } id="toggle-trigger" name="sender[]" type="checkbox" class="form-check-input"/>
+													</div>
+													<div class="col-auto">
+														<a href="#">
+															<span class="avatar avatar-1">{ sender.SenderEmail[:2] } </span>
+														</a>
+													</div>
+													<div class="col text-truncate">
+														<a href="#" class="text-reset d-block">{ sender.SenderEmail }</a>
+														<div class="d-block text-secondary text-truncate mt-n1">
+															Contains { sender.Count } mails
+														</div>
+													</div>
+												</div>
+											</div>
+										}
+									</div>
+								</div>
+							</form>
+					}
+				</div>
+			</div>
+		</body>
+	</html>
+}

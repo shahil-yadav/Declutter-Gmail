@@ -1,0 +1,16 @@
+{
+  "editor.wordWrap": "on",
+  "todo-tree.general.tags": [
+    "bug",
+    "hack",
+    "fixme",
+    "XXX",
+    "[ ]",
+    "[x]",
+    "todo",
+    "fix"
+  ],
+  "[templ]": {
+    "editor.defaultFormatter": "a-h.templ"
+  },
+}
