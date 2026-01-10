@@ -40,9 +40,7 @@ func Login(c *gin.Context) {
 		c.Redirect(http.StatusPermanentRedirect, auth_service.GetLoginURL(stateValue))
 
 	case "false":
-		appG.Response(http.StatusOK, e.SUCCESS, gin.H{
-			"login_url": auth_service.GetLoginURL(stateValue),
-		})
+		appG.Response(http.StatusOK, e.SUCCESS, auth_service.GetLoginURL(stateValue))
 
 	default:
 		// need the redirect query to function

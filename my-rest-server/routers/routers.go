@@ -16,7 +16,10 @@ func InitRouter() *gin.Engine {
 	e := gin.Default()
 
 	// enable cors for angular
-	e.Use(cors.Default())
+	config := cors.DefaultConfig()
+	config.AllowCredentials = true
+	config.AllowOrigins = []string{"http://localhost:4200"}
+	e.Use(cors.New(config))
 
 	gintemplrenderer.Setup(e)
 

@@ -41,10 +41,11 @@ func CreateScanJob(c *gin.Context) {
 }
 
 type JobStatus struct {
-	JobId     string
-	IsPending bool
-	IsSuccess bool
-	IsError   bool
+	JobId          string
+	IsPending      bool
+	IsSuccess      bool
+	IsError        bool
+	NoExistingJobs bool // user is new to the platform and hasn't create any trash job
 }
 
 type ScanJobResults struct {

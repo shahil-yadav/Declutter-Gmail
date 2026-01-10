@@ -22,7 +22,6 @@ type trashForm struct {
 
 type TrashJobResults struct {
 	JobStatus
-	NoExistingJobs bool // user is new to the platform and hasn't create any trash job
 }
 
 func ListActiveTrashJobInfo(c *gin.Context) {
@@ -41,10 +40,11 @@ func ListActiveTrashJobInfo(c *gin.Context) {
 	if err != nil {
 		if err == sql.ErrNoRows {
 			trashJobResults.NoExistingJobs = true
+			appG.Response(http.StatusOK, e.SUCCESS, trashJobResults)
 		} else {
 			appG.Response(http.StatusInternalServerError, e.ERROR, err.Error())
-			return
 		}
+		return
 	}
 
 	status, err := jobs_service.Client.Status(context.Background(), job)

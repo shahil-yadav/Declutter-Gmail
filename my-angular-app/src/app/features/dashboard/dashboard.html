@@ -1,0 +1,59 @@
+<div class="dashboard-container">
+    <div class="header-actions">
+        <h1>Select an Account</h1>
+        <a mat-raised-button color="primary" [href]="loginUrl" [disabled]="!loginUrl">
+            <mat-icon>add</mat-icon>
+            Add Account
+        </a>
+    </div>
+
+    @if (isDev) {
+    <div class="dev-controls">
+        <mat-slide-toggle [(ngModel)]="simulateError" (change)="toggleErrorSimulation()" color="warn">
+            Simulate Network Error
+        </mat-slide-toggle>
+    </div>
+    }
+
+    @if (errorMessage) {
+    <div class="error-message">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ errorMessage }}</span>
+    </div>
+    } @else {
+    <div class="user-grid">
+        @if (users.length > 0) {
+        @for (user of users; track user.UserId) {
+        <mat-card class="user-card">
+            <mat-card-header>
+                <div mat-card-avatar class="user-avatar" [style.background-image]="'url(' + user.CoverPhoto + ')'">
+                </div>
+                <mat-card-title>{{ user.FullName }}</mat-card-title>
+                <mat-card-subtitle>{{ user.Email }}</mat-card-subtitle>
+                <mat-card-subtitle class="joined-date" [class.new-label]="(user.CreatedAt | relativeTime) === 'New'">
+                    Joined: {{ user.CreatedAt | relativeTime }}
+                </mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-actions align="end">
+                <a mat-button [routerLink]="['/users', user.UserId]">Manage</a>
+            </mat-card-actions>
+        </mat-card>
+        }
+        } @else {
+        <!-- Empty State / Placeholder Cards -->
+        @for (item of [1, 2, 3]; track item) {
+        <mat-card class="user-card placeholder-card">
+            <mat-card-header>
+                <div mat-card-avatar class="user-avatar placeholder-avatar"></div>
+                <mat-card-title class="placeholder-text title"></mat-card-title>
+                <mat-card-subtitle class="placeholder-text subtitle"></mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-actions align="end">
+                <button mat-button disabled>Manage</button>
+            </mat-card-actions>
+        </mat-card>
+        }
+        }
+    </div>
+    }
+</div>

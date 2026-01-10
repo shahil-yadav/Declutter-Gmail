@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"database/sql"
 	"my-gmail-server/models"
 	"my-gmail-server/pkg/app"
 	"my-gmail-server/pkg/e"
@@ -34,6 +35,11 @@ func ListUserById(c *gin.Context) {
 
 	users, err := models.ListUserById(userId)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			appG.Response(http.StatusNotFound, e.NOT_FOUND, err.Error())
+			return
+		}
+
 		appG.Response(http.StatusInternalServerError, e.ERROR, err.Error())
 		return
 	}
