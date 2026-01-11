@@ -13,3 +13,17 @@ export interface ApiResponse<T> {
     msg: string;
     data: T;
 }
+
+export interface ScanResult {
+    SenderEmail: string;
+    Count: number;
+}
+
+export interface ScanStatus {
+    JobId: string;
+    IsPending: boolean;
+    IsSuccess: boolean;
+    IsError: boolean;
+    NoExistingJobs: boolean;
+    Results?: ScanResult[];
+}

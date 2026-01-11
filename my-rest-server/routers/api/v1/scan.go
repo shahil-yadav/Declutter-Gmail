@@ -2,6 +2,7 @@ package v1
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"my-gmail-server/models"
 	"my-gmail-server/pkg/app"
@@ -26,7 +27,11 @@ func CreateScanJob(c *gin.Context) {
 
 	user, err := models.ListUserById(userId)
 	if err != nil {
-		appG.Response(http.StatusInternalServerError, e.ERROR, err.Error())
+		if err == sql.ErrNoRows {
+			appG.Response(http.StatusNotFound, e.ERROR, "User not present in the database")
+		} else {
+			appG.Response(http.StatusInternalServerError, e.ERROR, err.Error())
+		}
 		return
 	}
 

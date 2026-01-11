@@ -27,6 +27,9 @@ func (job TrashJob) Config() backlite.QueueConfig {
 }
 
 func TrashJobWork(c context.Context, job TrashJob) error {
+	time.Sleep(1 * time.Minute)
+	return nil
+
 	gService, err := utils.CreateGmailService(job.UserId)
 	if err != nil {
 		return err

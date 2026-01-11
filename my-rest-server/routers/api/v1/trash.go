@@ -80,6 +80,12 @@ func CreateTrashJob(c *gin.Context) {
 		return
 	}
 
+	// check user
+	if _, err := models.ListUserById(trashForm.UserId); err != nil {
+		appG.Response(http.StatusNotFound, e.NOT_FOUND, "This user does not exist in the database")
+		return
+	}
+
 	job := jobs_service.CreateTrashJob(trashForm.UserId, trashForm.Senders)
 	jobIds, err := jobs_service.Client.Add(job).Save()
 	if err != nil || len(jobIds) > 1 {

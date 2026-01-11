@@ -27,8 +27,8 @@ func GetUserTokens(userId int) (oauth2.Token, error) {
 func ListUserById(userId int) (User, error) {
 	var user User
 
-	row := DB.QueryRow("SELECT email, full_name, cover_photo from users WHERE user_id=?", userId)
-	err := row.Scan(&user.Email, &user.FullName, &user.CoverPhoto)
+	row := DB.QueryRow("SELECT email, full_name, cover_photo, user_id from users WHERE user_id=?", userId)
+	err := row.Scan(&user.Email, &user.FullName, &user.CoverPhoto, &user.UserId)
 	if err != nil {
 		return User{}, err
 	}

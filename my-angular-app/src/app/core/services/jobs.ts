@@ -1,0 +1,31 @@
+import { Injectable } from '@angular/core';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { ApiResponse } from '../models/user';
+
+@Injectable({
+    providedIn: 'root'
+})
+export class JobsService {
+    private apiUrl = 'http://127.0.0.1:7331/v1/job';
+
+    constructor(private http: HttpClient) { }
+
+    startScan(userId: string): Observable<ApiResponse<string>> {
+        return this.http.post<ApiResponse<string>>(`${this.apiUrl}/scan`, {
+            userId: userId
+        });
+    }
+
+    startTrashJob(userId: string, senders: string[]): Observable<ApiResponse<string>> {
+        let params = new HttpParams();
+        params = params.append('user-id', userId);
+        senders.forEach(sender => {
+            params = params.append('sender[]', sender);
+        });
+
+        const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
+
+        return this.http.post<ApiResponse<string>>(`${this.apiUrl}/trash`, params.toString(), { headers });
+    }
+}

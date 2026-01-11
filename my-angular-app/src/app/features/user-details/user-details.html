@@ -27,8 +27,113 @@
 
     <main class="page-body">
         <!-- Body content will be added later -->
-        <div class="placeholder-content">
-            <p>Select an action to proceed</p>
+        <div class="scan-section">
+            <mat-card class="scan-card">
+                <mat-card-header>
+                    <mat-card-title>Scan Mailbox</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <p>
+                        Create a scan job in the golang backend to perform a full scan of your mailbox.
+                        This allows us to manage your mailbox for you, download your mail, store it in our database,
+                        and help you effectively delete them.
+                    </p>
+                </mat-card-content>
+                <mat-card-actions>
+                    <div class="actions-content">
+                        @if (trashStatus?.IsPending) {
+                        <div class="pending-state" style="flex-direction: column; text-align: center; padding: 2rem;">
+                            <mat-spinner diameter="40" style="margin-bottom: 1rem;"></mat-spinner>
+                            <p style="font-size: 1.1rem; color: #111827; font-weight: 500;">
+                                Trash job is currently running.
+                            </p>
+                            <p>Please come back some time later onwards, you may close the web app.</p>
+                        </div>
+                        } @else {
+                        <!-- Normal Scan UI -->
+                        @if (scanStatus?.IsPending) {
+                        <div class="pending-state">
+                            <mat-spinner diameter="24"></mat-spinner>
+                            <p>Job is still executing, please wait, and come back after 30 minutes.</p>
+                        </div>
+                        } @else if (scanStatus?.IsSuccess || simulatedScanSuccess) {
+                        <div class="success-results">
+                            <div class="alert-success">
+                                <mat-icon>check_circle</mat-icon>
+                                <span>Scan completed successfully!</span>
+                            </div>
+                            <!-- Table placeholder -->
+                            <div class="results-table-container">
+                                <table class="results-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="checkbox-col">
+                                                <input type="checkbox" [checked]="isAllSelected"
+                                                    (change)="toggleAllSelection()">
+                                            </th>
+                                            <th>Sender Email</th>
+                                            <th class="count-col">Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @for (result of scanStatus?.Results; track result) {
+                                        <tr [class.selected]="selectedSenders.has(result)">
+                                            <td class="checkbox-col">
+                                                <input type="checkbox" [checked]="selectedSenders.has(result)"
+                                                    (change)="toggleSelection(result)">
+                                            </td>
+                                            <td>{{ result.SenderEmail }}</td>
+                                            <td class="count-col">{{ result.Count }}</td>
+                                        </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            @if (selectedSenders.size > 0) {
+                            <button class="delete-fab" (click)="openDeleteModal()">
+                                <mat-icon>delete</mat-icon>
+                                Delete Selected ({{ totalDeleteCount }})
+                            </button>
+                            }
+                        </div>
+                        } @else {
+                        <!-- Error or Initial State -->
+                        @if (scanMessage) {
+                        <div class="success-message">
+                            <mat-icon>check_circle</mat-icon>
+                            <span>{{ scanMessage }}</span>
+                        </div>
+                        } @else if (scanErrorMessage || scanStatus?.IsError) {
+                        <div class="error-scan-message">
+                            <mat-icon>error</mat-icon>
+                            <span>{{ scanErrorMessage || 'Scan job encountered an error.' }}</span>
+                        </div>
+                        }
+
+                        <button mat-raised-button color="primary" (click)="startScan()">
+                            <mat-icon>search</mat-icon>
+                            {{ scanStatus?.IsError ? 'Retry Full Scan' : 'Start Full Scan' }}
+                        </button>
+                        }
+                        }
+
+
+                        @if (isDev && !scanStatus?.IsSuccess) {
+                        <div class="dev-scan-controls">
+                            <mat-slide-toggle [(ngModel)]="simulatedScanSuccess" (change)="toggleScanSuccess()"
+                                color="primary">
+                                Success
+                            </mat-slide-toggle>
+                            <mat-slide-toggle [(ngModel)]="simulatedScanError" (change)="toggleScanError()"
+                                color="warn">
+                                Error
+                            </mat-slide-toggle>
+                        </div>
+                        }
+                    </div>
+                </mat-card-actions>
+            </mat-card>
         </div>
     </main>
     } @else if (loading) {
@@ -45,6 +150,52 @@
 
         <p>{{ errorMessage }}</p>
         <button mat-raised-button color="primary" routerLink="/">Return to Safety</button>
+    </div>
+    }
+
+    @if (showDeleteModal) {
+    <div class="modal-overlay">
+        <div class="modal-container">
+            @if (trashJobLoading) {
+            <div class="loading-state" style="height: 200px;">
+                <mat-spinner diameter="40"></mat-spinner>
+                <p>Processing deletion...</p>
+            </div>
+            } @else if (trashJobMessage) {
+            <div class="success-message" style="flex-direction: column; text-align: center; padding: 2rem;">
+                <mat-icon
+                    style="font-size: 48px; width: 48px; height: 48px; margin-bottom: 1rem;">check_circle</mat-icon>
+                <p>{{ trashJobMessage }}</p>
+                <button mat-raised-button color="primary" (click)="closeDeleteModal()">Close</button>
+            </div>
+            } @else {
+            <h2 class="warning-title">
+                <mat-icon>warning</mat-icon>
+                Delete Confirmation
+            </h2>
+
+            @if (trashJobError) {
+            <div class="error-scan-message" style="margin-bottom: 1rem;">
+                <mat-icon>error</mat-icon>
+                <span>{{ trashJobError }}</span>
+            </div>
+            }
+
+            <p>You are about to delete emails from <strong>{{ selectedSenders.size }}</strong> senders.</p>
+            <p>This will permanently delete <strong>{{ totalDeleteCount }}</strong> emails.</p>
+
+            <div class="senders-list">
+                @for (sender of selectedSendersList; track sender) {
+                <div class="sender-item">{{ sender.SenderEmail }} ({{ sender.Count }})</div>
+                }
+            </div>
+
+            <div class="modal-actions">
+                <button mat-button (click)="closeDeleteModal()">Cancel</button>
+                <button mat-raised-button color="warn" (click)="proceedWithDelete()">Proceed</button>
+            </div>
+            }
+        </div>
     </div>
     }
 </div>
