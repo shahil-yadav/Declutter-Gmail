@@ -12,9 +12,9 @@ export class JobsService {
     constructor(private http: HttpClient) { }
 
     startScan(userId: string): Observable<ApiResponse<string>> {
-        return this.http.post<ApiResponse<string>>(`${this.apiUrl}/scan`, {
-            userId: userId
-        });
+        const formData = new FormData();
+        formData.append('user-id', userId);
+        return this.http.post<ApiResponse<string>>(`${this.apiUrl}/scan`, formData);
     }
 
     startTrashJob(userId: string, senders: string[]): Observable<ApiResponse<string>> {
