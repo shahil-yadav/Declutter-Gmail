@@ -7,7 +7,7 @@ import { ApiResponse } from '../models/user';
     providedIn: 'root'
 })
 export class JobsService {
-    private apiUrl = 'http://127.0.0.1:7331/v1/job';
+    private apiUrl = 'http://localhost:8080/v1/job';
 
     constructor(private http: HttpClient) { }
 

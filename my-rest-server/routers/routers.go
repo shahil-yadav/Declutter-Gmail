@@ -60,6 +60,8 @@ func InitRouter() *gin.Engine {
 		v1Prefixed.GET("/users/:id", v1.ListUserById)
 		v1Prefixed.GET("/users/:id/info/scan", v1.ListActiveScanJobInfo)
 		v1Prefixed.GET("/users/:id/info/trash", v1.ListActiveTrashJobInfo)
+
+		v1Prefixed.GET("/health", v1.CheckHealth)
 	}
 
 	return e

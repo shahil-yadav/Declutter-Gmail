@@ -7,7 +7,7 @@ import { ApiResponse, User, ScanStatus } from '../models/user';
     providedIn: 'root'
 })
 export class UsersService {
-    private apiUrl = 'http://127.0.0.1:7331/v1/users';
+    private apiUrl = 'http://localhost:8080/v1/users';
 
     constructor(private http: HttpClient) { }
 

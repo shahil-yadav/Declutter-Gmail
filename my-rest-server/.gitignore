@@ -1,5 +1,10 @@
 # Air cli
 tmp
 
+# sqlite3
+data.db
+data.db-shm
+data.db-wal
+
 # Macos
 .DS_Store 

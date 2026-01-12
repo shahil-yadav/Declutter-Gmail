@@ -2,7 +2,9 @@ package models
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/go-sql-driver/mysql"
@@ -27,11 +29,11 @@ VALUES(?, ?, ?, ?)
 func Setup() {
 	// Capture connection properties.
 	cfg := mysql.NewConfig()
-	cfg.User = "root"
-	cfg.Passwd = "my-secret-pw"
+	cfg.User = os.Getenv("DB_USER")
+	cfg.Passwd = os.Getenv("DB_PASSWORD")
 	cfg.Net = "tcp"
-	cfg.Addr = "127.0.0.1:3306" // using docker container of mysql image
-	cfg.DBName = "mydb"
+	cfg.Addr = fmt.Sprintf("%s:%s", os.Getenv("DB_HOST"), os.Getenv("DB_PORT"))
+	cfg.DBName = os.Getenv("DB_NAME")
 	cfg.ParseTime = true
 
 	// mysql is configured to use utc as checked by SELECT @@system_time_zone;

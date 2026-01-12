@@ -29,7 +29,7 @@ func RunWebUi(port int) error {
 	}
 
 	h.Register(mux)
-	err = http.ListenAndServe(fmt.Sprintf("127.0.0.1:%d", port), mux)
+	err = http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
 	if err != nil {
 		return err
 	}

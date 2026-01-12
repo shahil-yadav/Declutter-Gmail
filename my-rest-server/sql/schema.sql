@@ -12,22 +12,18 @@ CREATE TABLE mails (
 
 -- Create the table users for managin my google account
 CREATE TABLE users (
-    -- Using AUTO_INCREMENT, cannot use uuid due to skill issues
     user_id INT AUTO_INCREMENT PRIMARY KEY,
 
-    -- Basic User Info
     email VARCHAR(255) NOT NULL UNIQUE,
     full_name VARCHAR(255) NOT NULL,
     cover_photo TEXT,
 
-    -- OAuth Credentials
     access_token TEXT NOT NULL,
     refresh_token TEXT NOT NULL,
     expiry DATETIME,
     expires_in INT NOT NULL,
     token_type VARCHAR(30) DEFAULT 'Bearer',
 
-    -- Audit timestamps
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
