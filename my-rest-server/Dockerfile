@@ -13,7 +13,7 @@ RUN go mod download
 COPY . .
 
 RUN go build -o /my-rest-server
-EXPOSE 8081
+EXPOSE 8080
 
 CMD [ "/my-rest-server" ]
 

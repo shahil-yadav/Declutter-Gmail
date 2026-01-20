@@ -18,9 +18,10 @@ services:
       - DB_USER=root
       - DB_PASSWORD=${MYSQL_ROOT_PASSWORD:?database password not set}
       - DB_NAME=${MYSQL_DATABASE:-mydb}
-    deploy:
-      restart_policy:
-        condition: on-failure
+      
+    # deploy:
+    #   restart_policy:
+    #     condition: on-failure
 
   db:
     image: mysql:latest
@@ -37,7 +38,6 @@ services:
       - db_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping"]
-      timeout: 1s
       retries: 3
 
 volumes:
