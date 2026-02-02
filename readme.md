@@ -1,0 +1,1 @@
+parsed 16960 mails in 7min 44seconds using 20 threads
