@@ -22,8 +22,8 @@ func init() {
 
 func main() {
 	gin.SetMode(settings.ServerSetting.RunMode)
-	var g errgroup.Group
 
+	var g errgroup.Group
 	g.Go(func() error {
 		r := routers.InitRouter()
 		endPoint := fmt.Sprintf(":%d", settings.ServerSetting.HttpPort)
@@ -37,6 +37,6 @@ func main() {
 
 	//fix: if mux server has errors, errgroup.Group doesn't report
 	if err := g.Wait(); err != nil {
-		log.Fatal(err)
+		log.Fatal("failed to run either gin or mux", err)
 	}
 }

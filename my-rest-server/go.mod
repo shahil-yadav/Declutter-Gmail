@@ -10,6 +10,7 @@ require (
 	github.com/go-ini/ini v1.67.0
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/golang/glog v1.2.5
+	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/mikestefanello/backlite v0.6.0
 	golang.org/x/oauth2 v0.34.0

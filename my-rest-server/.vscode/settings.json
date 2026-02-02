@@ -9,8 +9,5 @@
     "[x]",
     "todo",
     "fix"
-  ],
-  "[templ]": {
-    "editor.defaultFormatter": "a-h.templ"
-  },
+  ]
 }

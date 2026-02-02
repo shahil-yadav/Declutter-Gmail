@@ -5,7 +5,6 @@ package jobs_service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"my-gmail-server/models"
 	"my-gmail-server/pkg/utils"
 	"my-gmail-server/services/auth_service"
@@ -53,37 +52,41 @@ func ScanJobWork(c context.Context, job ScanJob) error {
 
 	gMessages := utils.GetAllMessageIds(gService)
 
-	var mails []models.Mail
-	for _, message := range gMessages {
-		message, err := gService.Users.Messages.Get("me", message.Id).Format("metadata").Do()
-		// todo: improve this logic
-		if err != nil {
-			fmt.Println("Failed to fetch message:", message.Id)
-			continue
-		}
+	threads := 20
+	mails := utils.DistributedScan(gService, profile, job.UserId, gMessages, threads)
 
-		senderEmail, err := utils.ExtractSenderAdressFromGmailMessage(message)
-		if err != nil {
-			fmt.Println("Failed to extract sender email from message", message.Id)
-			continue
-		}
+	/* Synchronus computing earlier */
+	// var mails []models.Mail
+	// for _, message := range gMessages {
+	// 	message, err := gService.Users.Messages.Get("me", message.Id).Format("metadata").Do()
+	// 	// todo: improve this logic
+	// 	if err != nil {
+	// 		fmt.Println("Failed to fetch message:", message.Id)
+	// 		continue
+	// 	}
 
-		date, err := utils.ExtractDateFromGmailMessage(message)
-		if err != nil {
-			fmt.Println("Failed to extract date in UTC from message", message.Id)
-			//
-			continue
-		}
+	// 	senderEmail, err := utils.ExtractSenderAdressFromGmailMessage(message)
+	// 	if err != nil {
+	// 		fmt.Println("Failed to extract sender email from message", message.Id)
+	// 		continue
+	// 	}
 
-		mails = append(mails, models.Mail{
-			Id:           message.Id,
-			AccountEmail: profile.EmailAddress,
-			SenderEmail:  senderEmail,
-			Snippet:      message.Snippet,
-			Date:         date,
-			UserId:       job.UserId,
-		})
-	}
+	// 	date, err := utils.ExtractDateFromGmailMessage(message)
+	// 	if err != nil {
+	// 		fmt.Println("Failed to extract date in UTC from message", message.Id)
+	// 		//
+	// 		continue
+	// 	}
+
+	// 	mails = append(mails, models.Mail{
+	// 		Id:           message.Id,
+	// 		AccountEmail: profile.EmailAddress,
+	// 		SenderEmail:  senderEmail,
+	// 		Snippet:      message.Snippet,
+	// 		Date:         date,
+	// 		UserId:       job.UserId,
+	// 	})
+	// }
 
 	err = models.AddMails(mails)
 	if err != nil {

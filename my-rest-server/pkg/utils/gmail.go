@@ -2,6 +2,7 @@ package utils
 
 import (
 	"context"
+	"fmt"
 	"my-gmail-server/models"
 	"my-gmail-server/services/auth_service"
 	"net/mail"
@@ -43,7 +44,7 @@ func GetAllMessageIds(gService *gmail.Service) []*gmail.Message {
 		ctx      = context.Background()
 	)
 
-	gService.Users.Messages.List("me").Pages(
+	gService.Users.Messages.List("me").MaxResults(500).Pages(
 		ctx,
 		func(lmr *gmail.ListMessagesResponse) error {
 			messages = append(messages, lmr.Messages...)
@@ -97,4 +98,90 @@ func TrashGmailMessage(gService *gmail.Service, id string) error {
 func UntrashGmailMessage(gService *gmail.Service, id string) error {
 	_, err := gService.Users.Messages.Untrash("me", id).Do()
 	return err
+}
+
+// caution: giving it zero workers would discard the computing at all
+func DistributedScan(gService *gmail.Service, gProfile *gmail.Profile, userId int, tasks []*gmail.Message, workers int) []models.Mail {
+	channel := make(chan models.Mail, len(tasks)) // buffered ch
+	totalTasks := len(tasks)
+
+	if totalTasks == 0 || workers == 0 {
+		return nil
+	}
+
+	batchSize := totalTasks / min(totalTasks, workers)
+
+	var (
+		batchStart = 0
+		batchEnd   = batchSize
+	)
+
+	for range workers {
+		// specific check to prevent slicing out of bounds
+		if batchStart >= totalTasks {
+			break
+		}
+
+		// If the calculated end exceeds the total, cap it.
+		if batchEnd > totalTasks {
+			batchEnd = totalTasks
+		}
+
+		go FetchAndParseMail(gService, gProfile, userId, tasks[batchStart:batchEnd], channel)
+
+		batchStart = batchEnd
+		batchEnd = batchStart + batchSize
+	}
+
+	// Handle any remaining items (remainders)
+	if batchStart < totalTasks {
+		go FetchAndParseMail(gService, gProfile, userId, tasks[batchStart:], channel)
+	}
+
+	var mails []models.Mail
+
+	// drain the channel
+	// blocking in nature
+	for range totalTasks {
+		mails = append(mails, <-channel)
+	}
+
+	return mails
+
+}
+
+func FetchAndParseMail(gService *gmail.Service, gProfile *gmail.Profile, userId int, messages []*gmail.Message, ch chan models.Mail) {
+	for _, message := range messages {
+		message, err := gService.Users.Messages.Get("me", message.Id).Format("metadata").Do()
+
+		// todo: improve this logic
+		if err != nil {
+			fmt.Println("Failed to fetch message:", message.Id)
+			continue
+		}
+
+		senderEmail, err := ExtractSenderAdressFromGmailMessage(message)
+		if err != nil {
+			fmt.Println("Failed to extract sender email from message", message.Id)
+			continue
+		}
+
+		date, err := ExtractDateFromGmailMessage(message)
+		if err != nil {
+			fmt.Println("Failed to extract date in UTC from message", message.Id)
+			//
+			continue
+		}
+
+		mail := models.Mail{
+			Id:           message.Id,
+			AccountEmail: gProfile.EmailAddress,
+			SenderEmail:  senderEmail,
+			Snippet:      message.Snippet,
+			Date:         date,
+			UserId:       userId,
+		}
+
+		ch <- mail // add this mail to my buffered channel
+	}
 }

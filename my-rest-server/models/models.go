@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
 )
 
 var DB *sql.DB
@@ -27,6 +28,14 @@ VALUES(?, ?, ?, ?)
 
 // Setup initializes the database instance
 func Setup() {
+	var err error
+
+	// load .env files
+	err = godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	// Capture connection properties.
 	cfg := mysql.NewConfig()
 	cfg.User = os.Getenv("DB_USER")
@@ -40,15 +49,14 @@ func Setup() {
 	cfg.Loc = time.UTC
 
 	// Get a database handle.
-	var err error
 	DB, err = sql.Open("mysql", cfg.FormatDSN())
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("failed to open mysql:", err)
 	}
 
 	pingErr := DB.Ping()
 	if pingErr != nil {
-		log.Fatal(pingErr)
+		log.Fatal("failed to ping:", pingErr)
 	}
 
 	// note: schema of database is to do prior as defined sql/schema.sql
