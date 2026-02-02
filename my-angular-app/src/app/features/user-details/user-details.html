@@ -1,12 +1,14 @@
 <div class="user-details-layout">
     @if (user) {
-    <header class="user-navbar"
-        [style.background-image]="'linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url(' + user.CoverPhoto + ')'">
-        <div class="nav-content">
+    <header class="user-navbar">
+        <div class="nav-left">
             <a mat-icon-button routerLink="/" class="back-button">
                 <mat-icon>arrow_back</mat-icon>
             </a>
+            <h1 class="nav-title">User Results</h1>
+        </div>
 
+        <div class="nav-right">
             @if (isDev) {
             <div class="dev-controls">
                 <mat-slide-toggle [(ngModel)]="simulateError" (change)="toggleErrorSimulation()" color="warn">
@@ -16,11 +18,8 @@
             }
 
             <div class="user-info">
-                <div class="avatar" [style.background-image]="'url(' + user.CoverPhoto + ')'"></div>
-                <div class="text-info">
-                    <h1>{{ user.FullName }}</h1>
-                    <span class="email">{{ user.Email }}</span>
-                </div>
+                <span class="user-name">{{ user.FullName }}</span>
+                <img [src]="user.CoverPhoto" class="nav-avatar" referrerpolicy="no-referrer" alt="Profile">
             </div>
         </div>
     </header>

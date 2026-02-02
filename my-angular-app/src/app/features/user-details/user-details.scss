@@ -6,83 +6,82 @@
 }
 
 .user-navbar {
-    height: 200px;
-    background-size: cover;
-    background-position: center;
-    color: white;
+    height: 70px;
+    background-color: white;
     display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    padding: 1.5rem 2rem;
-    position: relative;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 
-    .nav-content {
-        display: flex;
-        align-items: flex-end;
-        gap: 1.5rem;
-        position: relative;
-        z-index: 10;
-    }
-
-    .back-button {
-        color: white;
-        margin-bottom: 0.5rem;
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(4px);
-
-        &:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-    }
-
-    .dev-controls {
-        margin-right: auto;
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(4px);
-        padding: 0.5rem 1rem;
-        border-radius: 999px;
-        color: white;
+    .nav-left {
         display: flex;
         align-items: center;
+        gap: 1rem;
 
-        ::ng-deep .mat-slide-toggle-content {
-            font-size: 0.875rem;
-            color: white;
+        .back-button {
+            color: #374151;
+
+            &:hover {
+                background-color: #f3f4f6;
+            }
+        }
+
+        .nav-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
         }
     }
 
-    .user-info {
+    .nav-right {
         display: flex;
-        align-items: flex-end;
+        align-items: center;
         gap: 1.5rem;
 
-        .avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            border: 3px solid white;
-            background-size: cover;
-            background-position: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        .dev-controls {
+            background: #f3f4f6;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+
+            ::ng-deep .mat-slide-toggle-content {
+                color: #4b5563;
+                font-size: 0.875rem;
+                font-weight: 500;
+            }
         }
 
-        .text-info {
-            padding-bottom: 0.5rem;
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-left: 1.5rem;
+            border-left: 1px solid #e5e7eb;
 
-            h1 {
-                margin: 0;
-                font-size: 2rem;
-                font-weight: 700;
-                line-height: 1.2;
-                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            .user-name {
+                font-size: 0.95rem;
+                font-weight: 600;
+                color: #374151;
             }
 
-            .email {
-                font-size: 1rem;
-                opacity: 0.9;
-                font-weight: 400;
-                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+            .nav-avatar {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                object-fit: cover;
+                border: 2px solid #e5e7eb;
+                transition: transform 0.2s;
+
+                &:hover {
+                    transform: scale(1.05);
+                    border-color: #d1d5db;
+                }
             }
         }
     }

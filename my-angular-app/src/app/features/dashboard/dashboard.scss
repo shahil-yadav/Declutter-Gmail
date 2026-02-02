@@ -52,8 +52,7 @@
   }
 
   .user-avatar {
-    background-size: cover;
-    background-position: center;
+    object-fit: cover;
   }
 
   .joined-date {

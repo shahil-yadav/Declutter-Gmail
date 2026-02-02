@@ -26,8 +26,8 @@
         @for (user of users; track user.UserId) {
         <mat-card class="user-card">
             <mat-card-header>
-                <div mat-card-avatar class="user-avatar" [style.background-image]="'url(' + user.CoverPhoto + ')'">
-                </div>
+                <img mat-card-avatar class="user-avatar" [src]="user.CoverPhoto" referrerpolicy="no-referrer"
+                    alt="User Avatar">
                 <mat-card-title>{{ user.FullName }}</mat-card-title>
                 <mat-card-subtitle>{{ user.Email }}</mat-card-subtitle>
                 <mat-card-subtitle class="joined-date" [class.new-label]="(user.CreatedAt | relativeTime) === 'New'">
