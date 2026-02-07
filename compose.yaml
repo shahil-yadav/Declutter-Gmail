@@ -12,6 +12,7 @@ services:
       - app_network
     ports:
       - "8080:8080"
+      - "9000:9000"
     environment:
       - DB_HOST=db
       - DB_PORT=3306

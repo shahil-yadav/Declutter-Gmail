@@ -116,7 +116,7 @@ func DistributedScan(gService *gmail.Service, gProfile *gmail.Profile, userId in
 		batchEnd   = batchSize
 	)
 
-	for range workers {
+	for i := range workers {
 		// specific check to prevent slicing out of bounds
 		if batchStart >= totalTasks {
 			break
@@ -127,7 +127,7 @@ func DistributedScan(gService *gmail.Service, gProfile *gmail.Profile, userId in
 			batchEnd = totalTasks
 		}
 
-		go FetchAndParseMail(gService, gProfile, userId, tasks[batchStart:batchEnd], channel)
+		go FetchAndParseMail(gService, gProfile, userId, tasks[batchStart:batchEnd], channel, i)
 
 		batchStart = batchEnd
 		batchEnd = batchStart + batchSize
@@ -135,7 +135,7 @@ func DistributedScan(gService *gmail.Service, gProfile *gmail.Profile, userId in
 
 	// Handle any remaining items (remainders)
 	if batchStart < totalTasks {
-		go FetchAndParseMail(gService, gProfile, userId, tasks[batchStart:], channel)
+		go FetchAndParseMail(gService, gProfile, userId, tasks[batchStart:], channel, workers)
 	}
 
 	var mails []models.Mail
@@ -143,33 +143,39 @@ func DistributedScan(gService *gmail.Service, gProfile *gmail.Profile, userId in
 	// drain the channel
 	// blocking in nature
 	for range totalTasks {
-		mails = append(mails, <-channel)
+		mail := <-channel
+
+		if mail.Id != "" {
+			mails = append(mails, mail)
+		}
 	}
 
 	return mails
 
 }
 
-func FetchAndParseMail(gService *gmail.Service, gProfile *gmail.Profile, userId int, messages []*gmail.Message, ch chan models.Mail) {
-	for _, message := range messages {
+func FetchAndParseMail(gService *gmail.Service, gProfile *gmail.Profile, userId int, messages []*gmail.Message, ch chan models.Mail, batchNo int) {
+	for i, message := range messages {
 		message, err := gService.Users.Messages.Get("me", message.Id).Format("metadata").Do()
 
 		// todo: improve this logic
 		if err != nil {
 			fmt.Println("Failed to fetch message:", message.Id)
+			ch <- models.Mail{}
 			continue
 		}
 
 		senderEmail, err := ExtractSenderAdressFromGmailMessage(message)
 		if err != nil {
 			fmt.Println("Failed to extract sender email from message", message.Id)
+			ch <- models.Mail{}
 			continue
 		}
 
 		date, err := ExtractDateFromGmailMessage(message)
 		if err != nil {
 			fmt.Println("Failed to extract date in UTC from message", message.Id)
-			//
+			ch <- models.Mail{}
 			continue
 		}
 
@@ -183,5 +189,8 @@ func FetchAndParseMail(gService *gmail.Service, gProfile *gmail.Profile, userId 
 		}
 
 		ch <- mail // add this mail to my buffered channel
+
+		// display status
+		fmt.Printf("Batch(%d): %d%% - scanned mails - %v\n", batchNo, (i*100)/len(messages), gProfile.EmailAddress)
 	}
 }
