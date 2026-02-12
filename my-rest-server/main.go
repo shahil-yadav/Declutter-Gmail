@@ -10,7 +10,6 @@ import (
 	"my-gmail-server/settings"
 
 	"github.com/gin-gonic/gin"
-	"golang.org/x/sync/errgroup"
 )
 
 func init() {
@@ -23,20 +22,10 @@ func init() {
 func main() {
 	gin.SetMode(settings.ServerSetting.RunMode)
 
-	var g errgroup.Group
-	g.Go(func() error {
-		r := routers.InitRouter()
-		endPoint := fmt.Sprintf(":%d", settings.ServerSetting.HttpPort)
+	r := routers.InitRouter()
+	port := fmt.Sprintf(":%d", settings.ServerSetting.HttpPort)
 
-		return r.Run(endPoint)
-	})
-
-	g.Go(func() error {
-		return jobs_service.RunWebUi(9000)
-	})
-
-	//fix: if mux server has errors, errgroup.Group doesn't report
-	if err := g.Wait(); err != nil {
-		log.Fatal("failed to run either gin or mux", err)
+	if err := r.Run(port); err != nil {
+		log.Fatal(err)
 	}
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"log/slog"
+	"my-gmail-server/settings"
 	"net/http"
 
 	"time"
@@ -18,31 +19,29 @@ import (
 var Client *backlite.Client
 var sqliteDb *sql.DB
 
-func RunWebUi(port int) error {
+func RunWebUi(port int) {
 	mux := http.DefaultServeMux
 	h, err := ui.NewHandler(ui.Config{
 		DB:       sqliteDb,
 		BasePath: "/ui",
 	})
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 
 	h.Register(mux)
-	err = http.ListenAndServe(fmt.Sprintf(":%d", port), mux)
-	if err != nil {
-		return err
+	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), mux); err != nil {
+		log.Fatal(err)
 	}
-
-	return nil
 }
 
 // initialise my jobs queues to do some fancy sse stuff
 func Setup() {
+	var err error
+
 	// todo: add cancel support
 	ctx := context.Background()
 
-	var err error
 	sqliteDb, err = sql.Open("sqlite3", "data.db?_journal=WAL&_timeout=5000")
 	if err != nil {
 		log.Fatal(err)
@@ -68,4 +67,7 @@ func Setup() {
 	}
 
 	Client.Start(ctx)
+
+	// Start the web server on port 9000 to monitor
+	go RunWebUi(settings.ServerSetting.JobsPort)
 }

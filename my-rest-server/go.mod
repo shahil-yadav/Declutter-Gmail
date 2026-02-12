@@ -14,7 +14,6 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/mikestefanello/backlite v0.6.0
 	golang.org/x/oauth2 v0.34.0
-	golang.org/x/sync v0.19.0
 	google.golang.org/api v0.257.0
 )
 

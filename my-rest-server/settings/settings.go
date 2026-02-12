@@ -20,6 +20,7 @@ type Server struct {
 	// can be debug or release
 	RunMode  string
 	HttpPort int
+	JobsPort int
 }
 
 var ServerSetting = &Server{}

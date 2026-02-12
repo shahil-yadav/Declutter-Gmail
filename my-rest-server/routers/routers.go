@@ -1,10 +1,8 @@
 package routers
 
 import (
-	"my-gmail-server/pkg/gintemplrenderer"
 	"my-gmail-server/routers/api"
 	v1 "my-gmail-server/routers/api/v1"
-	"my-gmail-server/routers/web"
 	"my-gmail-server/services/auth_service"
 	"my-gmail-server/settings"
 
@@ -12,24 +10,23 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func InitRouter() *gin.Engine {
-	e := gin.Default()
-
-	// enable cors for angular
+// enable cors for my angular spa
+func CorsHandler() gin.HandlerFunc {
 	config := cors.DefaultConfig()
 	config.AllowCredentials = true
 	config.AllowOrigins = []string{"http://localhost:4200"}
-	e.Use(cors.New(config))
+	return cors.New(config)
+}
 
-	gintemplrenderer.Setup(e)
+func InitRouter() *gin.Engine {
+	e := gin.Default()
 
-	// serving static files eg. image, video at 127.0.0.1/assets
 	e.Static("/assets", "./assets")
-
-	// initialise session for route group
+	e.Use(CorsHandler())
 	e.Use(auth_service.Session(settings.AuthSettings.SessionName))
 
-	v1Prefixed := e.Group("/v1")
+	apiv1 := e.Group("/api/v1")
+
 	auth := e.Group("/auth")
 	{
 		// initialise settings for google oauth2.0
@@ -40,28 +37,21 @@ func InitRouter() *gin.Engine {
 		auth.GET("/callback", api.AuthCallback)
 	}
 
-	// renders html routes
-	html := e.Group("/")
-	{
-		html.GET("/", web.Index)
-		html.GET("/:user", web.Dashboard)
-	}
-
 	// handles form submissions
-	forms := v1Prefixed.Group("/job")
+	jobs := apiv1.Group("/job")
 	{
-		forms.POST("/scan", v1.CreateScanJob)
-		forms.POST("/trash", v1.CreateTrashJob)
+		jobs.POST("/scan", v1.CreateScanJob)
+		jobs.POST("/trash", v1.CreateTrashJob)
 	}
 
 	// rest endpoints
 	{
-		v1Prefixed.GET("/users", v1.ListUsers)
-		v1Prefixed.GET("/users/:id", v1.ListUserById)
-		v1Prefixed.GET("/users/:id/info/scan", v1.ListActiveScanJobInfo)
-		v1Prefixed.GET("/users/:id/info/trash", v1.ListActiveTrashJobInfo)
+		apiv1.GET("/users", api.SetAuthState(), v1.ListUsers)
+		apiv1.GET("/users/:id", v1.ListUserById)
+		apiv1.GET("/users/:id/info/scan", v1.ListActiveScanJobInfo)
+		apiv1.GET("/users/:id/info/trash", v1.ListActiveTrashJobInfo)
 
-		v1Prefixed.GET("/health", v1.CheckHealth)
+		apiv1.GET("/health", v1.CheckHealth)
 	}
 
 	return e
