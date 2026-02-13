@@ -24,16 +24,6 @@ func Logout(c *gin.Context) {
 	appG.Response(http.StatusOK, e.SUCCESS, gin.H{"message": "you are successfully logged out"})
 }
 
-// middleware
-func SetAuthState() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		rvalue := auth_service.RandToken()
-		s := sessions.Default(c)
-		s.Set(auth_service.SessionState, rvalue)
-		s.Save()
-	}
-}
-
 func Login(c *gin.Context) {
 	appG := app.Gin{C: c}
 

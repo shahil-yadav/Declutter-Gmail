@@ -1,6 +1,7 @@
 package routers
 
 import (
+	"my-gmail-server/pkg/middleware"
 	"my-gmail-server/routers/api"
 	v1 "my-gmail-server/routers/api/v1"
 	"my-gmail-server/services/auth_service"
@@ -14,7 +15,7 @@ import (
 func CorsHandler() gin.HandlerFunc {
 	config := cors.DefaultConfig()
 	config.AllowCredentials = true
-	config.AllowOrigins = []string{"http://localhost:4200"}
+	config.AllowOrigins = []string{"http://localhost:4200", "http://localhost:3000"}
 	return cors.New(config)
 }
 
@@ -46,7 +47,7 @@ func InitRouter() *gin.Engine {
 
 	// rest endpoints
 	{
-		apiv1.GET("/users", api.SetAuthState(), v1.ListUsers)
+		apiv1.GET("/users", middleware.SetAuthState(), v1.ListUsers)
 		apiv1.GET("/users/:id", v1.ListUserById)
 		apiv1.GET("/users/:id/info/scan", v1.ListActiveScanJobInfo)
 		apiv1.GET("/users/:id/info/trash", v1.ListActiveTrashJobInfo)
